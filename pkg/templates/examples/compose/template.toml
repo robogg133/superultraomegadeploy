@@ -1,0 +1,4 @@
+name = "Gitea"
+type = "git"
+description = "Gitea is a self-hosted, lightweight Git service, offering version control, collaboration, and code hosting"
+website = "https://about.gitea.com"

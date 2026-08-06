@@ -1,0 +1,46 @@
+services:
+	gitea:
+		image: 'gitea/gitea:latest'
+		environment:
+			- SERVICE_URL_GITEA_3000: 'http://example.com'
+			- USER_UID=1000
+			- USER_GID=1000
+			- GITEA__database_DB_TYPE=postgres
+			- GITEA__databse_HOST=db
+			- GITEA__database_NAME=${POSTGRES_DATABASE}
+			- GITEA__database_USER=${POSTGRES_USER}
+			- GITEA__database_PASSWD=${POSTGRES_PASSWD}
+		volumes:
+			- 'gitea-data:/data'
+      		- 'gitea-timezone:/etc/timezone:ro'
+      		- 'gitea-localtime:/etc/localtime:ro'
+		ports:
+			- '22222:22'
+		depends_on:
+			db:
+				condition: service_health
+		healthcheck:
+			test:
+				- CMD
+				- curl
+				- '-f'
+				- 'http://127.0.0.1:3000'
+			interval: 2s
+			timeout: 10s
+			retries: 15
+	db:
+		image: postgres:16
+		volumes: 
+			- 'gitea-postgres-data:/var/lib/postgresql/data'
+		environment:
+			- POSTGRES_USER=${POSTGRES_USER}
+			- POSTGRES_PASSWORD=${POSTGRES_PASSWD}
+			- POSTGRES_DB=${POSTGRES_DATABASE}
+		healthcheck:
+			test:
+				- CMD-SHELL
+				- 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DATABASE}'
+			interval: 5s
+			timeout: 20s
+			retries: 10
+
