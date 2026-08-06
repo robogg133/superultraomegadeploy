@@ -1,11 +1,11 @@
-FROM golang:1.26.5 AS build
+FROM docker.io/golang:1.26.5 AS build
 WORKDIR /src
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -ldflags="-s -w" -trimpath -o app .
+RUN go build -v -x -ldflags="-s -w" -trimpath -o app .
 
 FROM scratch AS runner
 WORKDIR /app
