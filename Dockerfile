@@ -5,12 +5,12 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -v -x -ldflags="-s -w" -trimpath -o app .
+RUN CGO_ENABLED=0 go build -v -x -ldflags="-s -w" -trimpath -o app .
 
 FROM scratch AS runner
 WORKDIR /app
 
-COPY --from=build /src/app /app/app
+COPY --from=build /src/app /app/
 
 ENTRYPOINT [ "/app/app" ]
 EXPOSE 8080
