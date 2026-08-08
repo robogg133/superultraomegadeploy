@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superdeploy-app
+  namespace: superdeploy-namespace
+  labels:
+    app: superdeploy-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: superdeploy-app
+  template:
+    metadata:
+      labels:
+        app: superdeploy-app
+    spec:
+      containers:
+        - name: superdeploy-app
+          image: git.servidordomal.lol/robogg133/superdeploy:latest
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
