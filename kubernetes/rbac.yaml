@@ -5,25 +5,14 @@ metadata:
   namespace: superdeploy-namespace
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRoleBinding
 metadata:
-  name: superdeploy-pod-reader
-  namespace: default
-rules:
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["list", "get", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: superdeploy-pod-reader
-  namespace: default
+  name: superdeploy-app-cluster-admin
 subjects:
   - kind: ServiceAccount
     name: superdeploy-app
     namespace: superdeploy-namespace
 roleRef:
-  kind: Role
-  name: superdeploy-pod-reader
+  kind: ClusterRole
+  name: cluster-admin
   apiGroup: rbac.authorization.k8s.io
