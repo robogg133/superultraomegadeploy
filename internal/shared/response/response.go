@@ -12,7 +12,7 @@ func New() Response {
 }
 
 func (r Response) Response(msg any) Response {
-	r["message"] = msg
+	r["response"] = msg
 	return r
 }
 
