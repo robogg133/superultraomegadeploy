@@ -47,6 +47,9 @@ func NewLogEntry(r *http.Request) middleware.LogEntry {
 }
 
 func (l *logEntry) Write(status, bytes int, header http.Header, elapsed time.Duration, _ any) {
+	if l.req.URL.Path == "/healthz" {
+		return
+	}
 	log.Info().
 		Str("method", l.req.Method).
 		Str("ip", middleware.GetClientIPAddr(l.req.Context()).String()).
