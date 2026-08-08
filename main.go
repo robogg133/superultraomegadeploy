@@ -50,7 +50,11 @@ func main() {
 	})
 
 	r.Get("/api/v1/pods/list", func(w http.ResponseWriter, r *http.Request) {
-		list, err := k.ListPods(r.Context())
+		namespace := r.URL.Query().Get("namespace")
+		if namespace == "" {
+			namespace = "default"
+		}
+		list, err := k.ListPods(r.Context(), namespace)
 		if err != nil {
 			log.Ctx(r.Context()).Err(err).Send()
 			response.New().InternalServerError(w)
