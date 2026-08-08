@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: superdeploy-app
+  namespace: superdeploy-namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: superdeploy-pod-reader
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list", "get", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: superdeploy-pod-reader
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: superdeploy-app
+    namespace: superdeploy-namespace
+roleRef:
+  kind: Role
+  name: superdeploy-pod-reader
+  apiGroup: rbac.authorization.k8s.io

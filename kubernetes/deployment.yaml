@@ -15,9 +15,13 @@ spec:
       labels:
         app: superdeploy-app
     spec:
+      serviceAccountName: superdeploy-app
       containers:
         - name: superdeploy-app
           image: git.servidordomal.lol/robogg133/superdeploy:latest
+          env:
+            - name: DEBUG_ENABLED
+              value: "true"
           ports:
             - containerPort: 8080
           livenessProbe:
