@@ -57,7 +57,6 @@ BEGIN
     ON CONFLICT (key)
     DO UPDATE SET
         value = p_value,
-        version = configs.version + 1,
         updated_at = NOW();
 
     COMMIT;
