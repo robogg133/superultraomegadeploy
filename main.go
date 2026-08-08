@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//go:embed include/**
 var includeFs embed.FS
 
 func main() {
