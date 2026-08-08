@@ -32,6 +32,7 @@ func main() {
 	r.Get("/api/v1/pods/list", func(w http.ResponseWriter, r *http.Request) {
 		_, err := k.ListPods(r.Context())
 		if err != nil {
+			log.Err(err).Send()
 			response.New().InternalServerError(w)
 			return
 		}
