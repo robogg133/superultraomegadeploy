@@ -33,7 +33,9 @@ func ChiLogger(next http.Handler) http.Handler {
 		defer func() {
 			entry.Write(ww.Status(), ww.BytesWritten(), ww.Header(), time.Since(t1), nil)
 		}()
-		next.ServeHTTP(ww, middleware.WithLogEntry(r, entry))
+		req := middleware.WithLogEntry(r, entry)
+		req = req.WithContext(log.With().Str("rid", req.Context().Value(CTXKeyRequestID).(string)).Logger().WithContext(req.Context()))
+		next.ServeHTTP(ww, req)
 	}
 	return http.HandlerFunc(fn)
 }
