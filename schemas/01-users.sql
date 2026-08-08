@@ -13,12 +13,14 @@ CREATE TABLE IF NOT EXISTS users.user (
 );
 CREATE INDEX IF NOT EXISTS idx_user_email ON users.user(user_email);
 
-CREATE TABLE users.session (
+-- This table needs a automatic cleanup
+CREATE TABLE users.sessions (
     session_id TEXT PRIMARY KEY,
     user_id UUID REFERENCES users.user(user_id) ON DELETE CASCADE ON UPDATE RESTRICT,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON users.sessions(user_id);
 
 CREATE TABLE IF NOT EXISTS users.permission (
     user_id UUID PRIMARY KEY REFERENCES users.user(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
