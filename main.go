@@ -5,6 +5,7 @@ import (
 	"embed"
 	"io"
 	"net/http"
+	_ "net/http/pprof"
 
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/auth"
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/database"
@@ -21,6 +22,12 @@ import (
 var includeFs embed.FS
 
 func main() {
+	if DebugEnabled {
+		go func() {
+			log.Info().Msg("pprof on :6060")
+			http.ListenAndServe(":6060", nil)
+		}()
+	}
 	appCtx, appCtxCancel := context.WithCancel(context.Background())
 	defer appCtxCancel()
 	initLogger()
