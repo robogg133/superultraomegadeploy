@@ -55,13 +55,38 @@ CREATE OR REPLACE PROCEDURE set_config(
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    INSERT INTO configs (key, value)
+    INSERT INTO configs.configs (key, value)
     VALUES (p_key, p_value)
     ON CONFLICT (key)
     DO UPDATE SET
         value = p_value,
+        version = configs.configs.version + 1,
         updated_at = NOW();
 
     COMMIT;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE set_server_config(
+    p_user_id UUID,
+    p_key TEXT,
+    p_value JSONB
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    can_change BOOLEAN;
+BEGIN
+    SELECT EXISTS(
+        SELECT 1 FROM users.permissions
+        WHERE user_id = p_user_id
+          AND permission = 'canChangeServerSettings'
+    ) INTO can_change;
+
+    IF can_change IS NOT TRUE THEN
+        RAISE EXCEPTION 'forbidden'
+            USING ERRCODE = '42501';
+    END IF;
+
+    CALL set_config(p_key, p_value);
 END;
 $$;

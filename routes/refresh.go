@@ -8,6 +8,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// @Summary Refresh the short-lived session token
+// @Tags auth
+// @Produce json
+// @Success 200 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /api/v1/auth/refresh [post]
 func Refresh(a *auth.Auth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

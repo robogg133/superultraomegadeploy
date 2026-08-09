@@ -17,6 +17,8 @@ const (
 	KeyRegistryURL      string = "registryUrl"
 	KeyRegistryUser     string = "registryUser"
 	KeyRegistryPassword string = "registryPassword"
+
+	KeySwaggerEnabled string = "swaggerEnabled"
 )
 
 type ConfigValue struct {

@@ -7,7 +7,9 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
+	_ "git.servidordomal.lol/robogg133/superultraomegadeploy/docs"
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/auth"
+	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/configs"
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/database"
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/shared/response"
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/pkg/kube"
@@ -16,10 +18,18 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/matthewhartstonge/argon2"
 	"github.com/rs/zerolog/log"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 //go:embed include/**
 var includeFs embed.FS
+
+// @title SuperDeploy API
+// @version 1.0
+// @BasePath /
+// @securityDefinitions.apikey bearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	if DebugEnabled {
@@ -50,12 +60,16 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
+	if err := configs.Init(databaseCtx, d.P); err != nil {
+		log.Fatal().Err(err).Send()
+	}
 	argon := argon2.RecommendedDefaults()
 	a := auth.New(d, JWTSecret)
 
-	r.Post("/api/v1/users/register", routes.Regsiter(d, a, argon))
+	r.Post("/api/v1/auth/register", routes.Regsiter(d, a, argon))
 	r.Post("/api/v1/auth/login", routes.Login(d, argon, a))
 	r.Post("/api/v1/auth/refresh", routes.Refresh(a))
+	r.With(a.RequireAuth).Post("/api/v1/config", routes.SetConfig(d))
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
@@ -77,6 +91,13 @@ func main() {
 	})
 
 	r.With(a.RequireAuth).Get("/api/v1/pods/list", routes.PodsList(k))
+
+	r.Get("/swagger/*", func(w http.ResponseWriter, r *http.Request) {
+		if !configs.Bool("swaggerEnabled") {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		}
+		httpSwagger.Handler(httpSwagger.URL("/swagger/doc.json")).ServeHTTP(w, r)
+	})
 
 	hserver := http.Server{
 		Addr:    ":8080",

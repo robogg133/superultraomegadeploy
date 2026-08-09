@@ -5,4 +5,5 @@ const (
 	ErrorCodeNullField  = "00001"
 	ErrorCodeBadRequest = "00002"
 	ErrorCodeUnauthorized = "00003"
+	ErrorCodeForbidden    = "00004"
 )

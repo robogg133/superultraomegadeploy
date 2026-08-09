@@ -17,6 +17,15 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+// @Summary Login and receive a session token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body LoginRequest true "email and password"
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Router /api/v1/auth/login [post]
 func Login(d *database.Database, argon argon2.Config, a *auth.Auth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

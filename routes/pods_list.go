@@ -8,6 +8,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// @Summary List pods in a namespace
+// @Tags kubernetes
+// @Produce json
+// @Param namespace query string false "namespace (default: default)"
+// @Success 200 {object} response.Response
+// @Failure 401 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Security bearerAuth
+// @Router /api/v1/pods/list [get]
 func PodsList(k *kube.Kube) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		namespace := r.URL.Query().Get("namespace")
