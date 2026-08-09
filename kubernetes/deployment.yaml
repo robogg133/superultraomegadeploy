@@ -19,6 +19,9 @@ spec:
       containers:
         - name: superdeploy-app
           image: git.servidordomal.lol/robogg133/superdeploy:latest
+          envFrom:
+            - secretRef:
+                name: superdeploy-secrets
           env:
             - name: DEBUG_ENABLED
               value: "true"
