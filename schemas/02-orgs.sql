@@ -1,7 +1,7 @@
 CREATE SCHEMA IF NOT EXISTS org;
 
 CREATE TABLE IF NOT EXISTS org.org (
-    org_id UUID PRIMARY KEY DEFAULT uuidv7(),
+    org_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     org_slug TEXT NOT NULL,
     org_name TEXT NOT NULL,
@@ -17,10 +17,9 @@ CREATE TABLE IF NOT EXISTS org.members (
     user_id UUID REFERENCES users.user(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     org_member_id UUID PRIMARY KEY DEFAULT uuidv7(),
 
-    -- Permssions
+    -- Permissions
     can_create_projects BOOL NOT NULL DEFAULT TRUE,
     can_modify_org BOOL NOT NULL DEFAULT TRUE,
-
 
 
     added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

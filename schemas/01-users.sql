@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users.user (
 
     user_password TEXT NOT NULL,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_user_email ON users.user(user_email);
 

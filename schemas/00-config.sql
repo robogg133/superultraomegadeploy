@@ -1,6 +1,9 @@
-CREATE TABLE IF NOT EXISTS configs(
+CREATE SCHEMA IF NOT EXISTS configs;
+
+CREATE TABLE IF NOT EXISTS configs.configs(
     key TEXT PRIMARY KEY,
     value JSONB NOT NULL,
+    version INT NOT NULL DEFAULT 0,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -23,7 +26,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER config_notify_trigger
-    AFTER INSERT OR UPDATE ON configs
+    AFTER INSERT OR UPDATE ON configs.configs
     FOR EACH ROW
     EXECUTE FUNCTION notify_config_change();
 
@@ -42,7 +45,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER config_delete_trigger
-    AFTER DELETE ON configs
+    AFTER DELETE ON configs.configs
     FOR EACH ROW
     EXECUTE FUNCTION notify_config_delete();
 
