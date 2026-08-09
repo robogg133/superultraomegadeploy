@@ -20,6 +20,15 @@ type RegisterRequest struct {
 	Password  string `json:"password"`
 }
 
+// @Summary Register a new user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body RegisterRequest true "user data"
+// @Success 201 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Failure 409 {object} response.Response
+// @Router /api/v1/auth/register [post]
 func Regsiter(d *database.Database, a *auth.Auth, argon argon2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -42,6 +51,17 @@ func Regsiter(d *database.Database, a *auth.Auth, argon argon2.Config) http.Hand
 			return
 		}
 
+		firstUser := false
+		count, err := d.UserCount(ctx)
+		if err != nil {
+			l.Err(err).Msg("counting users")
+			response.New().InternalServerError(w)
+			return
+		}
+		if count == 0 {
+			firstUser = true
+		}
+
 		id, err := d.RegisterUser(ctx, database.RegisterUser{
 			Email:         req.Email,
 			UserFirstName: req.FirstName,
@@ -56,6 +76,13 @@ func Regsiter(d *database.Database, a *auth.Auth, argon argon2.Config) http.Hand
 			l.Err(err).Msg("storing to database")
 			response.New().InternalServerError(w)
 			return
+		}
+		if firstUser {
+			if err := d.GrantAllPermissions(ctx, id); err != nil {
+				l.Err(err).Msg("granting permissions")
+				response.New().InternalServerError(w)
+				return
+			}
 		}
 		token, err := a.IssueSession(ctx, w, id)
 		if err != nil {

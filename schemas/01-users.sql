@@ -22,10 +22,9 @@ CREATE TABLE users.sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON users.sessions(user_id);
 
-CREATE TABLE IF NOT EXISTS users.permission (
-    user_id UUID PRIMARY KEY REFERENCES users.user(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+CREATE TABLE IF NOT EXISTS users.permissions (
+    user_id UUID REFERENCES users.user(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    permission TEXT NOT NULL,
 
-    can_create_org  BOOL NOT NULL DEFAULT FALSE,
-    can_invite_user BOOL NOT NULL DEFAULT FALSE,
-    can_change_server_settings  BOOL NOT NULL DEFAULT FALSE
+    PRIMARY KEY (user_id, permission)
 );
