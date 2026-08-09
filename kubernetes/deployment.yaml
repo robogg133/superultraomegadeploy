@@ -26,7 +26,10 @@ spec:
             - name: DEBUG_ENABLED
               value: "true"
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+            - name: pprof
+              containerPort: 6060
           livenessProbe:
             httpGet:
               path: /healthz
