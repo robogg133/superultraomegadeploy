@@ -9,10 +9,12 @@ var (
 	DebugEnabled bool
 
 	PostgresConnString string
+	JWTSecret          string
 )
 
 func init() {
 	PostgresConnString = os.Getenv("POSTGRES_CONN_STRING")
+	JWTSecret = os.Getenv("JWT_SECRET")
 }
 
 func init() {

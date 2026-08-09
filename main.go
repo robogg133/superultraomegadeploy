@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"io"
 	"net/http"
 
+	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/auth"
+	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/database"
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/shared/response"
 	"git.servidordomal.lol/robogg133/superultraomegadeploy/pkg/kube"
+	"git.servidordomal.lol/robogg133/superultraomegadeploy/routes"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/matthewhartstonge/argon2"
 	"github.com/rs/zerolog/log"
 )
 
@@ -16,7 +21,10 @@ import (
 var includeFs embed.FS
 
 func main() {
+	appCtx, appCtxCancel := context.WithCancel(context.Background())
+	defer appCtxCancel()
 	initLogger()
+
 	log.Info().Msg("Hello World!")
 	r := chi.NewRouter()
 
@@ -29,6 +37,18 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
+	databaseCtx := context.WithoutCancel(appCtx)
+
+	d, err := database.Init(databaseCtx, PostgresConnString)
+	if err != nil {
+		log.Fatal().Err(err).Send()
+	}
+	argon := argon2.RecommendedDefaults()
+	a := auth.New(d, JWTSecret)
+
+	r.Post("/api/v1/users/register", routes.Regsiter(d, a, argon))
+	r.Post("/api/v1/auth/login", routes.Login(d, argon, a))
+	r.Post("/api/v1/auth/refresh", routes.Refresh(a))
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
@@ -49,30 +69,7 @@ func main() {
 		}
 	})
 
-	r.Get("/api/v1/pods/list", func(w http.ResponseWriter, r *http.Request) {
-		namespace := r.URL.Query().Get("namespace")
-		if namespace == "" {
-			namespace = "default"
-		}
-		list, err := k.ListPods(r.Context(), namespace)
-		if err != nil {
-			log.Ctx(r.Context()).Err(err).Send()
-			response.New().InternalServerError(w)
-			return
-		}
-		resp := make([]map[string]any, 0)
-
-		for _, pod := range list {
-			r := make(map[string]any)
-			r["name"] = pod.Name
-			r["namespace"] = pod.Namespace
-			r["creation_time"] = pod.CreationTimestamp.Time
-			resp = append(resp, r)
-		}
-		log.Ctx(r.Context()).Debug().Int("len_pods", len(resp)).Send()
-
-		response.New().Response(resp).Send(w, 200)
-	})
+	r.With(a.RequireAuth).Get("/api/v1/pods/list", routes.PodsList(k))
 
 	hserver := http.Server{
 		Addr:    ":8080",

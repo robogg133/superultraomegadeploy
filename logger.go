@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"git.servidordomal.lol/robogg133/superultraomegadeploy/internal/auth"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -35,6 +36,11 @@ func ChiLogger(next http.Handler) http.Handler {
 		}()
 		req := middleware.WithLogEntry(r, entry)
 		req = req.WithContext(log.With().Str("rid", req.Context().Value(CTXKeyRequestID).(string)).Logger().WithContext(req.Context()))
+
+		uid, ok := auth.UserID(req.Context())
+		if ok {
+			req = req.WithContext(log.With().Str("uid", uid.String()).Logger().WithContext(req.Context()))
+		}
 		next.ServeHTTP(ww, req)
 	}
 	return http.HandlerFunc(fn)
@@ -50,17 +56,19 @@ func (l *logEntry) Write(status, bytes int, header http.Header, elapsed time.Dur
 	if l.req.URL.Path == "/healthz" {
 		return
 	}
-	log.Info().
+	lg := log.Ctx(l.req.Context()).Info().
 		Str("method", l.req.Method).
 		Str("ip", middleware.GetClientIPAddr(l.req.Context()).String()).
 		Str("path", l.req.URL.Path).
 		Int("status", status).
 		Int("bytes", bytes).
 		Str("elapsed", elapsed.String()).
-		Str("rid", l.req.Context().Value(CTXKeyRequestID).(string)).
-		Msg("Request")
-
-	// TODO: user-id
+		Str("rid", l.req.Context().Value(CTXKeyRequestID).(string))
+	uid, ok := auth.UserID(l.req.Context())
+	if ok {
+		lg.Str("uid", uid.String())
+	}
+	lg.Msg("Request")
 
 }
 

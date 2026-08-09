@@ -17,7 +17,11 @@ func (r Response) Response(msg any) Response {
 }
 
 func (r Response) InternalServerError(w http.ResponseWriter) {
-	r.Error("Internal Server Error", ErrorCodeUnknown).Send(w, 500)
+	r.Error("Internal Server Error", ErrorCodeUnknown).Send(w, http.StatusBadRequest)
+}
+
+func (r Response) BadRequest(w http.ResponseWriter) {
+	r.Error("Bad Request", ErrorCodeBadRequest).Send(w, http.StatusBadRequest)
 }
 
 func (r Response) Send(w http.ResponseWriter, status int) error {
