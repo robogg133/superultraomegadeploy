@@ -20,7 +20,7 @@ func init() {
 func init() {
 	var err error
 	DebugEnabled, err = strconv.ParseBool(os.Getenv("DEBUG_ENABLED"))
-	if err != nil {
+	if err != nil && os.Getenv("DEBUG_ENABLED") != "" {
 		panic(err)
 	}
 }
