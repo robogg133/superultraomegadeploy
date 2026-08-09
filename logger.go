@@ -37,10 +37,6 @@ func ChiLogger(next http.Handler) http.Handler {
 		req := middleware.WithLogEntry(r, entry)
 		req = req.WithContext(log.With().Str("rid", req.Context().Value(CTXKeyRequestID).(string)).Logger().WithContext(req.Context()))
 
-		if uid, ok := auth.UserID(req.Context()); ok {
-			req = req.WithContext(log.Ctx(req.Context()).With().Str("uid", uid.String()).Logger().WithContext(req.Context()))
-		}
-
 		entry.req = req
 		next.ServeHTTP(ww, req)
 	}
@@ -63,8 +59,7 @@ func (l *logEntry) Write(status, bytes int, header http.Header, elapsed time.Dur
 		Str("path", l.req.URL.Path).
 		Int("status", status).
 		Int("bytes", bytes).
-		Str("elapsed", elapsed.String()).
-		Str("rid", l.req.Context().Value(CTXKeyRequestID).(string))
+		Str("elapsed", elapsed.String())
 	uid, ok := auth.UserID(l.req.Context())
 	if ok {
 		lg = lg.Str("uid", uid.String())
